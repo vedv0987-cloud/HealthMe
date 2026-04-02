@@ -11,7 +11,8 @@
     "cap:sync": "npm run build:mobile && npx cap sync android",
     "cap:open": "npx cap open android",
     "cap:run": "npx cap run android",
-    "cap:build": "npm run cap:sync && npx cap open android"
+    "cap:build": "npm run cap:sync && npx cap open android",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
