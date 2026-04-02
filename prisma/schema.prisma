@@ -1,0 +1,619 @@
+// HealthMe - Health & Nutrition Tracking App
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHTLY_ACTIVE
+  MODERATELY_ACTIVE
+  VERY_ACTIVE
+  EXTRA_ACTIVE
+}
+
+enum DietaryGoal {
+  LOSE_WEIGHT
+  GAIN_WEIGHT
+  MAINTAIN
+  BUILD_MUSCLE
+  IMPROVE_HEALTH
+  MANAGE_CONDITION
+}
+
+enum MealType {
+  BREAKFAST
+  MORNING_SNACK
+  LUNCH
+  AFTERNOON_SNACK
+  DINNER
+  EVENING_SNACK
+  MIDNIGHT_SNACK
+}
+
+enum Mood {
+  GREAT
+  GOOD
+  OKAY
+  BAD
+  TERRIBLE
+}
+
+enum BeverageType {
+  WATER
+  COCONUT_WATER
+  GREEN_TEA
+  BLACK_COFFEE
+  JUICE
+  BUTTERMILK
+  MILK
+  LEMON_WATER
+  OTHER
+}
+
+enum ExerciseType {
+  CARDIO
+  STRENGTH
+  FLEXIBILITY
+  HIIT
+  YOGA
+  WALKING
+  RUNNING
+  CYCLING
+  SWIMMING
+  SPORTS
+  DANCE
+  OTHER
+}
+
+enum Intensity {
+  LOW
+  MODERATE
+  HIGH
+  EXTREME
+}
+
+enum FastingProtocol {
+  F16_8
+  F18_6
+  F20_4
+  F5_2
+  EAT_STOP_EAT
+  WARRIOR
+  CUSTOM
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum MealPlanType {
+  AI_GENERATED
+  COACH_CREATED
+  USER_CUSTOM
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum AchievementCategory {
+  STREAK
+  NUTRITION
+  EXERCISE
+  WEIGHT
+  SOCIAL
+  SPECIAL
+}
+
+enum AchievementTier {
+  BRONZE
+  SILVER
+  GOLD
+  DIAMOND
+}
+
+enum PostType {
+  PROGRESS
+  RECIPE
+  TIP
+  QUESTION
+  CHALLENGE
+  TRANSFORMATION
+}
+
+enum ChallengeType {
+  STEPS
+  WATER
+  CALORIES
+  EXERCISE
+  WEIGHT
+  CUSTOM
+}
+
+enum NotificationType {
+  MEAL_REMINDER
+  WATER_REMINDER
+  EXERCISE_REMINDER
+  STREAK
+  ACHIEVEMENT
+  COACH_MESSAGE
+  COMMUNITY
+  SYSTEM
+  PROMOTION
+}
+
+enum SubscriptionTier {
+  FREE
+  SMART
+  PRO
+  ELITE
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id                  String           @id @default(uuid()) @db.Uuid
+  supabaseId          String           @unique @map("supabase_id")
+  email               String           @unique
+  name                String?
+  avatarUrl           String?          @map("avatar_url")
+  dateOfBirth         DateTime?        @map("date_of_birth") @db.Date
+  gender              Gender?
+  heightCm            Float?           @map("height_cm")
+  weightKg            Float?           @map("weight_kg")
+  targetWeightKg      Float?           @map("target_weight_kg")
+  activityLevel       ActivityLevel?   @map("activity_level")
+  dietaryGoal         DietaryGoal?     @map("dietary_goal")
+  dietaryPreference   String?          @map("dietary_preference")
+  cuisinePreferences  String[]         @map("cuisine_preferences")
+  allergies           String[]
+  medicalConditions   String[]         @map("medical_conditions")
+  dailyCalorieTarget  Int?             @map("daily_calorie_target")
+  dailyProteinG       Float?           @map("daily_protein_g")
+  dailyCarbsG         Float?           @map("daily_carbs_g")
+  dailyFatG           Float?           @map("daily_fat_g")
+  dailyFiberG         Float?           @map("daily_fiber_g")
+  dailyWaterMl        Int?             @map("daily_water_ml")
+  timezone            String           @default("Asia/Kolkata")
+  language            String           @default("en")
+  subscriptionTier    SubscriptionTier @default(FREE) @map("subscription_tier")
+  onboardingCompleted Boolean          @default(false) @map("onboarding_completed")
+  streakDays          Int              @default(0) @map("streak_days")
+  longestStreak       Int              @default(0) @map("longest_streak")
+  totalMealsLogged    Int              @default(0) @map("total_meals_logged")
+  xpPoints            Int              @default(0) @map("xp_points")
+  level               Int              @default(1)
+  referralCode        String?          @unique @map("referral_code")
+  fcmToken            String?          @map("fcm_token")
+  lastActiveAt        DateTime?        @map("last_active_at")
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  mealLogs         MealLog[]
+  waterLogs        WaterLog[]
+  weightLogs       WeightLog[]
+  exerciseLogs     ExerciseLog[]
+  sleepLogs        SleepLog[]
+  fastingSessions  FastingSession[]
+  aiChatMessages   AiChatMessage[]
+  mealPlans        MealPlan[]
+  recipes          Recipe[]
+  savedRecipes     UserRecipeSaved[]
+  achievements     UserAchievement[]
+  communityPosts   CommunityPost[]
+  challenges       UserChallenge[]
+  notifications    Notification[]
+  dailySummaries   DailySummary[]
+
+  @@map("users")
+}
+
+model FoodItem {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String
+  nameLocal          String?  @map("name_local")
+  brand              String?
+  barcode            String?
+  category           String?
+  subcategory        String?
+  cuisineType        String?  @map("cuisine_type")
+  region             String?
+  servingSizeG       Float?   @map("serving_size_g")
+  servingUnit        String   @default("g") @map("serving_unit")
+  servingDescription String?  @map("serving_description")
+  caloriesPerServing Float?   @map("calories_per_serving")
+  proteinG           Float?   @map("protein_g")
+  carbsG             Float?   @map("carbs_g")
+  fatG               Float?   @map("fat_g")
+  fiberG             Float?   @map("fiber_g")
+  sugarG             Float?   @map("sugar_g")
+  saturatedFatG      Float?   @map("saturated_fat_g")
+  transFatG          Float?   @map("trans_fat_g")
+  cholesterolMg      Float?   @map("cholesterol_mg")
+  sodiumMg           Float?   @map("sodium_mg")
+  potassiumMg        Float?   @map("potassium_mg")
+  calciumMg          Float?   @map("calcium_mg")
+  ironMg             Float?   @map("iron_mg")
+  vitaminAIu         Float?   @map("vitamin_a_iu")
+  vitaminCMg         Float?   @map("vitamin_c_mg")
+  vitaminDIu         Float?   @map("vitamin_d_iu")
+  vitaminB12Mcg      Float?   @map("vitamin_b12_mcg")
+  glycemicIndex      Int?     @map("glycemic_index")
+  isVerified         Boolean  @default(false) @map("is_verified")
+  verifiedBy         String?  @map("verified_by")
+  imageUrl           String?  @map("image_url")
+  popularityScore    Int      @default(0) @map("popularity_score")
+  searchTags         String[] @map("search_tags")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  // Relations
+  mealLogs MealLog[]
+
+  @@index([barcode])
+  @@index([category])
+  @@index([name])
+  @@map("food_items")
+}
+
+model MealLog {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  foodId            String?   @map("food_id") @db.Uuid
+  customFoodName    String?   @map("custom_food_name")
+  mealType          MealType  @map("meal_type")
+  quantity          Float     @default(1)
+  servingMultiplier Float     @default(1.0) @map("serving_multiplier")
+  calories          Float?
+  proteinG          Float?    @map("protein_g")
+  carbsG            Float?    @map("carbs_g")
+  fatG              Float?    @map("fat_g")
+  fiberG            Float?    @map("fiber_g")
+  photoUrl          String?   @map("photo_url")
+  aiDetected        Boolean   @default(false) @map("ai_detected")
+  aiConfidence      Float?    @map("ai_confidence")
+  notes             String?
+  moodBefore        Mood?     @map("mood_before")
+  moodAfter         Mood?     @map("mood_after")
+  loggedAt          DateTime  @map("logged_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food FoodItem? @relation(fields: [foodId], references: [id], onDelete: SetNull)
+
+  @@index([userId, loggedAt])
+  @@map("meal_logs")
+}
+
+model WaterLog {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  amountMl     Int          @map("amount_ml")
+  beverageType BeverageType @default(WATER) @map("beverage_type")
+  loggedAt     DateTime     @map("logged_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+  @@map("water_logs")
+}
+
+model WeightLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  weightKg      Float    @map("weight_kg")
+  bodyFatPercent Float?  @map("body_fat_percent")
+  muscleMassKg  Float?   @map("muscle_mass_kg")
+  bmi           Float?
+  waistCm       Float?   @map("waist_cm")
+  hipCm         Float?   @map("hip_cm")
+  chestCm       Float?   @map("chest_cm")
+  photoFrontUrl String?  @map("photo_front_url")
+  photoSideUrl  String?  @map("photo_side_url")
+  notes         String?
+  loggedAt      DateTime @map("logged_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+  @@map("weight_logs")
+}
+
+model ExerciseLog {
+  id              String       @id @default(uuid()) @db.Uuid
+  userId          String       @map("user_id") @db.Uuid
+  exerciseName    String       @map("exercise_name")
+  exerciseType    ExerciseType @map("exercise_type")
+  durationMinutes Int?         @map("duration_minutes")
+  caloriesBurned  Float?       @map("calories_burned")
+  heartRateAvg    Int?         @map("heart_rate_avg")
+  heartRateMax    Int?         @map("heart_rate_max")
+  distanceKm      Float?       @map("distance_km")
+  steps           Int?
+  setsJson        Json?        @map("sets_json")
+  intensity       Intensity?
+  notes           String?
+  loggedAt        DateTime     @map("logged_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+  @@map("exercise_logs")
+}
+
+model SleepLog {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  sleepStart      DateTime @map("sleep_start")
+  sleepEnd        DateTime @map("sleep_end")
+  durationMinutes Int?     @map("duration_minutes")
+  qualityScore    Int?     @map("quality_score")
+  deepSleepMin    Int?     @map("deep_sleep_min")
+  lightSleepMin   Int?     @map("light_sleep_min")
+  remSleepMin     Int?     @map("rem_sleep_min")
+  awakenings      Int?
+  notes           String?
+  loggedAt        DateTime @map("logged_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+  @@map("sleep_logs")
+}
+
+model FastingSession {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @map("user_id") @db.Uuid
+  protocol    FastingProtocol
+  startedAt   DateTime        @map("started_at")
+  targetEndAt DateTime        @map("target_end_at")
+  actualEndAt DateTime?       @map("actual_end_at")
+  completed   Boolean         @default(false)
+  notes       String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+  @@map("fasting_sessions")
+}
+
+model AiChatMessage {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  sessionId       String   @map("session_id")
+  role            ChatRole
+  content         String
+  attachmentsJson Json?    @map("attachments_json")
+  metadataJson    Json?    @map("metadata_json")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sessionId])
+  @@map("ai_chat_messages")
+}
+
+model MealPlan {
+  id              String       @id @default(uuid()) @db.Uuid
+  userId          String       @map("user_id") @db.Uuid
+  planName        String       @map("plan_name")
+  planType        MealPlanType @map("plan_type")
+  startDate       DateTime     @map("start_date") @db.Date
+  endDate         DateTime     @map("end_date") @db.Date
+  dailyCalories   Int?         @map("daily_calories")
+  mealsJson       Json?        @map("meals_json")
+  groceryListJson Json?        @map("grocery_list_json")
+  isActive        Boolean      @default(true) @map("is_active")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@map("meal_plans")
+}
+
+model Recipe {
+  id                      String     @id @default(uuid()) @db.Uuid
+  title                   String
+  titleLocal              String?    @map("title_local")
+  description             String?
+  cuisineType             String?    @map("cuisine_type")
+  dietTags                String[]   @map("diet_tags")
+  prepTimeMin             Int?       @map("prep_time_min")
+  cookTimeMin             Int?       @map("cook_time_min")
+  servings                Int        @default(1)
+  difficulty              Difficulty?
+  ingredientsJson         Json?      @map("ingredients_json")
+  stepsJson               Json?      @map("steps_json")
+  nutritionPerServingJson Json?      @map("nutrition_per_serving_json")
+  imageUrl                String?    @map("image_url")
+  videoUrl                String?    @map("video_url")
+  caloriesPerServing      Float?     @map("calories_per_serving")
+  authorId                String?    @map("author_id") @db.Uuid
+  isPremium               Boolean    @default(false) @map("is_premium")
+  rating                  Float      @default(0)
+  ratingCount             Int        @default(0) @map("rating_count")
+  saveCount               Int        @default(0) @map("save_count")
+  createdAt               DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  author      User?             @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  savedByUsers UserRecipeSaved[]
+
+  @@index([cuisineType])
+  @@index([authorId])
+  @@map("recipes")
+}
+
+model UserRecipeSaved {
+  userId   String   @map("user_id") @db.Uuid
+  recipeId String   @map("recipe_id") @db.Uuid
+  savedAt  DateTime @default(now()) @map("saved_at")
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@map("user_recipes_saved")
+}
+
+model Achievement {
+  id            String              @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?
+  icon          String?
+  category      AchievementCategory
+  xpReward      Int                 @default(0) @map("xp_reward")
+  conditionJson Json?               @map("condition_json")
+  tier          AchievementTier
+
+  // Relations
+  users UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        String      @map("user_id") @db.Uuid
+  achievementId String      @map("achievement_id") @db.Uuid
+  unlockedAt    DateTime    @default(now()) @map("unlocked_at")
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model CommunityPost {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  content       String
+  imageUrls     String[] @map("image_urls")
+  postType      PostType @map("post_type")
+  likesCount    Int      @default(0) @map("likes_count")
+  commentsCount Int      @default(0) @map("comments_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("community_posts")
+}
+
+model Challenge {
+  id               String        @id @default(uuid()) @db.Uuid
+  title            String
+  description      String?
+  challengeType    ChallengeType @map("challenge_type")
+  targetValue      Float         @map("target_value")
+  targetUnit       String        @map("target_unit")
+  durationDays     Int           @map("duration_days")
+  startDate        DateTime      @map("start_date") @db.Date
+  endDate          DateTime      @map("end_date") @db.Date
+  rewardXp         Int           @default(0) @map("reward_xp")
+  imageUrl         String?       @map("image_url")
+  maxParticipants  Int?          @map("max_participants")
+  isActive         Boolean       @default(true) @map("is_active")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  participants UserChallenge[]
+
+  @@map("challenges")
+}
+
+model UserChallenge {
+  userId       String    @map("user_id") @db.Uuid
+  challengeId  String    @map("challenge_id") @db.Uuid
+  progressValue Float    @default(0) @map("progress_value")
+  completed    Boolean   @default(false)
+  joinedAt     DateTime  @default(now()) @map("joined_at")
+  completedAt  DateTime? @map("completed_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, challengeId])
+  @@id([userId, challengeId])
+  @@map("user_challenges")
+}
+
+model Notification {
+  id       String           @id @default(uuid()) @db.Uuid
+  userId   String           @map("user_id") @db.Uuid
+  title    String
+  body     String
+  type     NotificationType
+  dataJson Json?            @map("data_json")
+  read     Boolean          @default(false)
+  sentAt   DateTime         @default(now()) @map("sent_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, sentAt])
+  @@map("notifications")
+}
+
+model DailySummary {
+  id                  String   @id @default(uuid()) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  date                DateTime @db.Date
+  totalCalories       Float    @default(0) @map("total_calories")
+  totalProteinG       Float    @default(0) @map("total_protein_g")
+  totalCarbsG         Float    @default(0) @map("total_carbs_g")
+  totalFatG           Float    @default(0) @map("total_fat_g")
+  totalFiberG         Float    @default(0) @map("total_fiber_g")
+  totalWaterMl        Int      @default(0) @map("total_water_ml")
+  totalExerciseMin    Int      @default(0) @map("total_exercise_min")
+  totalCaloriesBurned Float    @default(0) @map("total_calories_burned")
+  totalSteps          Int      @default(0) @map("total_steps")
+  sleepHours          Float?   @map("sleep_hours")
+  weightKg            Float?   @map("weight_kg")
+  moodAvg             Float?   @map("mood_avg")
+  healthScore         Int?     @map("health_score")
+  aiInsight           String?  @map("ai_insight")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("daily_summaries")
+}
