@@ -9,6 +9,8 @@ import {
   Dumbbell,
   Flame,
   Plus,
+  Sun,
+  Target,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,6 +66,39 @@ export default function DashboardPage() {
             day: "numeric",
           })}
         </p>
+      </motion.div>
+
+      {/* Morning Briefing Card */}
+      <motion.div variants={item}>
+        <Card className="overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Sun className="size-5" />
+              <p className="text-sm font-medium opacity-90">
+                {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              </p>
+            </div>
+            <p className="text-sm opacity-90 mb-3">
+              Yesterday you ate 1,742 kcal (94% of target). Protein was strong at 98g. Water was on track at 2,100ml.
+            </p>
+            <div className="flex items-start gap-2 p-2 rounded-lg bg-white/10 mb-3">
+              <Target className="size-4 shrink-0 mt-0.5" />
+              <p className="text-sm opacity-95">Try to hit 80g protein today. Add paneer or eggs to lunch.</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/log">
+                <Button size="sm" className="bg-white/20 text-white hover:bg-white/30 border-0">
+                  <Camera className="size-3 mr-1" />Log breakfast
+                </Button>
+              </Link>
+              <Link href="/ria">
+                <Button size="sm" className="bg-white/20 text-white hover:bg-white/30 border-0">
+                  <Bot className="size-3 mr-1" />Chat with Ria
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       <motion.div variants={item}>
