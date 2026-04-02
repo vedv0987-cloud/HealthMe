@@ -1,0 +1,18 @@
+{
+  "name": "HealMe — AI-Powered Health Companion",
+  "short_name": "HealMe",
+  "description": "Track calories, macros, water, and exercise with AI photo scanning. Built for Indian diets.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#10B981",
+  "background_color": "#FFFFFF",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "categories": ["health", "fitness", "food"],
+  "lang": "en",
+  "dir": "ltr"
+}
