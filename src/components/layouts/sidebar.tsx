@@ -2,112 +2,121 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { motion } from "framer-motion";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import IconButton from "@mui/material/IconButton";
+import MuiAvatar from "@mui/material/Avatar";
+import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import MuiTooltip from "@mui/material/Tooltip";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
-import { cn } from "@/lib/utils";
 import { Logo } from "@/components/atoms/logo";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation";
 import { useUiStore } from "@/stores/ui-store";
-import { useIsDesktop } from "@/hooks/use-media-query";
 
 function SidebarNavContent({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1 px-2">
+    <List sx={{ px: 1 }}>
       {SIDEBAR_NAV_ITEMS.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
 
-        const link = (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-              collapsed && "justify-center px-2",
-              isActive
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            )}
-          >
-            {isActive && (
-              <motion.span
-                layoutId="sidebar-active-bg"
-                className="absolute inset-0 rounded-lg bg-primary/10"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-              />
-            )}
-            <Icon
-              className={cn(
-                "relative z-10 size-5 shrink-0",
-                isActive && "text-primary"
+        const button = (
+          <ListItem key={item.href} disablePadding sx={{ mb: 0.5 }}>
+            <ListItemButton
+              component={Link}
+              href={item.href}
+              selected={isActive}
+              sx={{
+                borderRadius: 2,
+                minHeight: 40,
+                justifyContent: collapsed ? "center" : "flex-start",
+                px: collapsed ? 1.5 : 2,
+                "&.Mui-selected": {
+                  bgcolor: "primary.main",
+                  color: "primary.contrastText",
+                  "&:hover": { bgcolor: "primary.dark" },
+                  "& .MuiListItemIcon-root": { color: "primary.contrastText" },
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: collapsed ? 0 : 36,
+                  color: isActive ? "primary.contrastText" : "text.secondary",
+                }}
+              >
+                <Icon size={20} />
+              </ListItemIcon>
+              {!collapsed && (
+                <ListItemText
+                  primary={item.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.875rem",
+                    fontWeight: isActive ? 600 : 500,
+                  }}
+                />
               )}
-            />
-            {!collapsed && (
-              <span className="relative z-10 truncate">{item.label}</span>
-            )}
-          </Link>
+            </ListItemButton>
+          </ListItem>
         );
 
         if (collapsed) {
           return (
-            <Tooltip key={item.href}>
-              <TooltipTrigger render={link} />
-              <TooltipContent side="right">{item.label}</TooltipContent>
-            </Tooltip>
+            <MuiTooltip key={item.href} title={item.label} placement="right" arrow>
+              {button}
+            </MuiTooltip>
           );
         }
 
-        return link;
+        return button;
       })}
-    </nav>
+    </List>
   );
 }
 
 function SidebarUserCard({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
-      <div className="flex justify-center px-2 py-3">
-        <Avatar size="sm">
-          <AvatarImage src="/avatars/user.jpg" alt="User" />
-          <AvatarFallback>U</AvatarFallback>
-        </Avatar>
-      </div>
+      <Box sx={{ display: "flex", justifyContent: "center", px: 1, py: 1.5 }}>
+        <MuiAvatar src="/avatars/user.jpg" alt="User" sx={{ width: 28, height: 28 }} />
+      </Box>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2.5 mx-2">
-      <Avatar size="sm">
-        <AvatarImage src="/avatars/user.jpg" alt="User" />
-        <AvatarFallback>U</AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col min-w-0">
-        <span className="truncate text-sm font-medium text-foreground">
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        mx: 1,
+        px: 1.5,
+        py: 1.5,
+        borderRadius: 2,
+        bgcolor: "action.hover",
+      }}
+    >
+      <MuiAvatar src="/avatars/user.jpg" alt="User" sx={{ width: 28, height: 28 }} />
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="body2" fontWeight={500} noWrap>
           User
-        </span>
-        <Badge variant="secondary" className="w-fit text-[10px] px-1.5 h-4">
-          Free Plan
-        </Badge>
-      </div>
-    </div>
+        </Typography>
+        <Chip label="Free Plan" size="small" color="secondary" sx={{ height: 18, fontSize: "0.625rem" }} />
+      </Box>
+    </Box>
   );
 }
 
@@ -122,68 +131,99 @@ export function DesktopSidebar() {
       initial={false}
       animate={{ width: collapsed ? 64 : 256 }}
       transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-      className="hidden lg:flex flex-col h-screen sticky top-0 border-r border-border bg-background z-40 overflow-hidden"
+      style={{
+        display: "none",
+        flexDirection: "column",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        overflow: "hidden",
+        zIndex: 40,
+      }}
     >
-      {/* Logo + collapse toggle */}
-      <div
-        className={cn(
-          "flex h-16 shrink-0 items-center border-b border-border px-3",
-          collapsed ? "justify-center" : "justify-between"
-        )}
+      <Box
+        sx={{
+          display: { xs: "none", lg: "flex" },
+          flexDirection: "column",
+          height: "100%",
+          borderRight: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
       >
-        <Logo size="sm" showText={!collapsed} />
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={toggleSidebar}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        {/* Logo + collapse toggle */}
+        <Box
+          sx={{
+            display: "flex",
+            height: 64,
+            alignItems: "center",
+            borderBottom: 1,
+            borderColor: "divider",
+            px: collapsed ? 0 : 1.5,
+            justifyContent: collapsed ? "center" : "space-between",
+          }}
         >
-          {collapsed ? (
-            <ChevronsRight className="size-4" />
-          ) : (
-            <ChevronsLeft className="size-4" />
-          )}
-        </Button>
-      </div>
+          {!collapsed && <Logo size="sm" showText />}
+          <IconButton onClick={toggleSidebar} size="small">
+            {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+          </IconButton>
+        </Box>
 
-      {/* Nav items */}
-      <ScrollArea className="flex-1 py-3">
-        <SidebarNavContent collapsed={collapsed} />
-      </ScrollArea>
+        {/* Nav items */}
+        <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
+          <SidebarNavContent collapsed={collapsed} />
+        </Box>
 
-      {/* User card */}
-      <div className="shrink-0 border-t border-border py-3">
-        <SidebarUserCard collapsed={collapsed} />
-      </div>
+        {/* User card */}
+        <Divider />
+        <Box sx={{ py: 1 }}>
+          <SidebarUserCard collapsed={collapsed} />
+        </Box>
+      </Box>
     </motion.aside>
   );
 }
 
-/** Mobile sidebar (Sheet drawer) */
+/** Mobile sidebar (Drawer) */
 export function MobileSidebar() {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const setSidebarOpen = useUiStore((s) => s.setSidebarOpen);
 
   return (
-    <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-      <SheetContent side="left" className="w-72 p-0">
-        <SheetTitle className="sr-only">Navigation</SheetTitle>
+    <Drawer
+      open={sidebarOpen}
+      onClose={() => setSidebarOpen(false)}
+      sx={{
+        "& .MuiDrawer-paper": {
+          width: 280,
+          bgcolor: "background.paper",
+        },
+      }}
+    >
+      {/* Logo */}
+      <Box
+        sx={{
+          display: "flex",
+          height: 64,
+          alignItems: "center",
+          borderBottom: 1,
+          borderColor: "divider",
+          px: 2,
+        }}
+      >
+        <Logo size="sm" showText />
+      </Box>
 
-        {/* Logo */}
-        <div className="flex h-16 items-center border-b border-border px-4">
-          <Logo size="sm" showText />
-        </div>
+      {/* Nav */}
+      <Box sx={{ flex: 1, overflowY: "auto", py: 1 }}>
+        <SidebarNavContent collapsed={false} />
+      </Box>
 
-        {/* Nav */}
-        <ScrollArea className="flex-1 py-3">
-          <SidebarNavContent collapsed={false} />
-        </ScrollArea>
-
-        {/* User card */}
-        <div className="mt-auto border-t border-border py-3">
-          <SidebarUserCard collapsed={false} />
-        </div>
-      </SheetContent>
-    </Sheet>
+      {/* User card */}
+      <Divider />
+      <Box sx={{ py: 1 }}>
+        <SidebarUserCard collapsed={false} />
+      </Box>
+    </Drawer>
   );
 }

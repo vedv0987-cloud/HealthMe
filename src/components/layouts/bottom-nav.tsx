@@ -3,17 +3,52 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import Box from "@mui/material/Box";
+import BottomNavigation from "@mui/material/BottomNavigation";
+import BottomNavigationAction from "@mui/material/BottomNavigationAction";
+import Fab from "@mui/material/Fab";
+import Typography from "@mui/material/Typography";
 
-import { cn } from "@/lib/utils";
 import { BOTTOM_NAV_ITEMS } from "@/constants/navigation";
 
 export function BottomNav() {
   const pathname = usePathname();
 
+  const activeIndex = BOTTOM_NAV_ITEMS.findIndex(
+    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`)
+  );
+
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 lg:hidden">
-      <div className="h-16 border-t border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-lg items-end justify-around px-2 pb-1">
+    <Box
+      sx={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 40,
+        display: { lg: "none" },
+      }}
+    >
+      <Box
+        sx={{
+          borderTop: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            height: 64,
+            maxWidth: 480,
+            mx: "auto",
+            alignItems: "flex-end",
+            justifyContent: "space-around",
+            px: 1,
+            pb: 0.5,
+          }}
+        >
           {BOTTOM_NAV_ITEMS.map((item, index) => {
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -22,64 +57,105 @@ export function BottomNav() {
 
             if (isCenterAction) {
               return (
-                <Link
+                <Box
                   key={item.href}
+                  component={Link}
                   href={item.href}
-                  className="relative flex flex-col items-center -mt-5"
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    mt: -2.5,
+                    textDecoration: "none",
+                  }}
                 >
-                  {/* Elevated circular button */}
-                  <span className="flex size-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 transition-transform active:scale-95">
-                    <Icon className="size-6" />
-                  </span>
-                  <span
-                    className={cn(
-                      "mt-0.5 text-[10px] font-medium",
-                      isActive ? "text-emerald-500" : "text-muted-foreground"
-                    )}
+                  <Fab
+                    color="primary"
+                    size="medium"
+                    sx={{
+                      boxShadow: "0 4px 14px rgba(16, 185, 129, 0.4)",
+                    }}
+                  >
+                    <Icon size={24} />
+                  </Fab>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      mt: 0.25,
+                      fontSize: "0.625rem",
+                      fontWeight: 500,
+                      color: isActive ? "primary.main" : "text.secondary",
+                    }}
                   >
                     {item.label}
-                  </span>
-                </Link>
+                  </Typography>
+                </Box>
               );
             }
 
             return (
-              <Link
+              <Box
                 key={item.href}
+                component={Link}
                 href={item.href}
-                className="relative flex flex-col items-center gap-0.5 pt-2 pb-1 px-3"
+                sx={{
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.25,
+                  pt: 1,
+                  pb: 0.5,
+                  px: 1.5,
+                  textDecoration: "none",
+                }}
               >
                 <Icon
-                  className={cn(
-                    "size-5 transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  )}
+                  size={20}
+                  style={{
+                    color: isActive ? "var(--mui-palette-primary-main)" : "var(--mui-palette-text-secondary)",
+                    transition: "color 0.2s",
+                  }}
                 />
-                <span
-                  className={cn(
-                    "text-[10px] font-medium transition-colors",
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontSize: "0.625rem",
+                    fontWeight: 500,
+                    color: isActive ? "primary.main" : "text.secondary",
+                  }}
                 >
                   {item.label}
-                </span>
+                </Typography>
 
-                {/* Active indicator dot */}
                 {isActive && (
                   <motion.span
                     layoutId="bottom-nav-indicator"
-                    className="absolute -bottom-0.5 h-1 w-5 rounded-full bg-primary"
+                    style={{
+                      position: "absolute",
+                      bottom: -2,
+                      height: 4,
+                      width: 20,
+                      borderRadius: 2,
+                      background: "var(--mui-palette-primary-main)",
+                    }}
                     transition={{ type: "spring", bounce: 0.25, duration: 0.4 }}
                   />
                 )}
-              </Link>
+              </Box>
             );
           })}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
-      {/* Safe area spacer for devices with home indicators */}
-      <div className="h-[env(safe-area-inset-bottom)] bg-background/80 backdrop-blur-md" />
-    </nav>
+      {/* Safe area spacer */}
+      <Box
+        sx={{
+          height: "env(safe-area-inset-bottom)",
+          bgcolor: "background.paper",
+          backdropFilter: "blur(12px)",
+        }}
+      />
+    </Box>
   );
 }

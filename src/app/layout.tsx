@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "next-themes";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { MuiThemeProvider } from "@/components/providers/mui-theme-provider";
+import { NativeProvider } from "@/components/providers/native-provider";
+import { AuthDeepLinkProvider } from "@/components/providers/auth-deep-link-provider";
+import { AuthGuardProvider } from "@/components/providers/auth-guard-provider";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,10 +59,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>
-            {children}
+          <MuiThemeProvider>
+            <NativeProvider>
+              <AuthDeepLinkProvider>
+                <AuthGuardProvider>
+                  {children}
+                </AuthGuardProvider>
+              </AuthDeepLinkProvider>
+            </NativeProvider>
             <Toaster richColors position="top-center" />
-          </TooltipProvider>
+          </MuiThemeProvider>
         </ThemeProvider>
       </body>
     </html>

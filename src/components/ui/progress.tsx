@@ -1,83 +1,51 @@
-"use client"
+"use client";
 
-import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
+import * as React from "react";
+import MuiLinearProgress from "@mui/material/LinearProgress";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
-import { cn } from "@/lib/utils"
+interface ProgressProps {
+  value?: number;
+  className?: string;
+  children?: React.ReactNode;
+}
 
-function Progress({
-  className,
-  children,
-  value,
-  ...props
-}: ProgressPrimitive.Root.Props) {
+function Progress({ value = 0, className, children }: ProgressProps) {
   return (
-    <ProgressPrimitive.Root
-      value={value}
-      data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
-      {...props}
-    >
+    <Box className={className} sx={{ display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center", width: "100%" }}>
       {children}
-      <ProgressTrack>
-        <ProgressIndicator />
-      </ProgressTrack>
-    </ProgressPrimitive.Root>
-  )
+      <MuiLinearProgress
+        variant="determinate"
+        value={Math.min(100, Math.max(0, value))}
+        sx={{ flex: 1, borderRadius: 2 }}
+      />
+    </Box>
+  );
 }
 
-function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
+function ProgressTrack({ className, children }: { className?: string; children?: React.ReactNode }) {
+  return <Box className={className}>{children}</Box>;
+}
+
+function ProgressIndicator({ className }: { className?: string }) {
+  return <Box className={className} />;
+}
+
+function ProgressLabel({ className, children }: { className?: string; children?: React.ReactNode }) {
   return (
-    <ProgressPrimitive.Track
-      className={cn(
-        "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-muted",
-        className
-      )}
-      data-slot="progress-track"
-      {...props}
-    />
-  )
+    <Typography variant="body2" fontWeight={500} className={className}>
+      {children}
+    </Typography>
+  );
 }
 
-function ProgressIndicator({
-  className,
-  ...props
-}: ProgressPrimitive.Indicator.Props) {
+function ProgressValue({ className, children }: { className?: string; children?: React.ReactNode }) {
   return (
-    <ProgressPrimitive.Indicator
-      data-slot="progress-indicator"
-      className={cn("h-full bg-primary transition-all", className)}
-      {...props}
-    />
-  )
+    <Typography variant="body2" color="text.secondary" className={className} sx={{ ml: "auto", fontVariantNumeric: "tabular-nums" }}>
+      {children}
+    </Typography>
+  );
 }
 
-function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
-  return (
-    <ProgressPrimitive.Label
-      className={cn("text-sm font-medium", className)}
-      data-slot="progress-label"
-      {...props}
-    />
-  )
-}
-
-function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
-  return (
-    <ProgressPrimitive.Value
-      className={cn(
-        "ml-auto text-sm text-muted-foreground tabular-nums",
-        className
-      )}
-      data-slot="progress-value"
-      {...props}
-    />
-  )
-}
-
-export {
-  Progress,
-  ProgressTrack,
-  ProgressIndicator,
-  ProgressLabel,
-  ProgressValue,
-}
+export { Progress, ProgressTrack, ProgressIndicator, ProgressLabel, ProgressValue };

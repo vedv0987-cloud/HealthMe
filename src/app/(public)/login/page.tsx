@@ -6,15 +6,27 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import MuiButton from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import GoogleIcon from "@mui/icons-material/Google";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import AppleIcon from "@mui/icons-material/Apple";
 import { Logo } from "@/components/atoms/logo";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth";
 import { createClient } from "@/lib/supabase/client";
+import { signInWithProvider } from "@/lib/auth/oauth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,176 +62,163 @@ export default function LoginPage() {
     }
   }
 
-  async function signInWithGoogle() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
-    });
-  }
-
-  async function signInWithFacebook() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "facebook",
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
-    });
-  }
-
-  async function signInWithApple() {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "apple",
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
-    });
+  async function handleOAuth(provider: "google" | "facebook" | "apple") {
+    try {
+      await signInWithProvider(provider);
+    } catch {
+      toast.error(`${provider} sign-in failed. Please try again.`);
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        py: 6,
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        style={{ width: "100%", maxWidth: 440 }}
       >
-        <div className="rounded-2xl border bg-card p-8 shadow-sm">
-          <div className="flex flex-col items-center mb-6">
+        <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: 1, borderColor: "divider" }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mb: 3 }}>
             <Logo size="md" />
-            <h1 className="font-heading text-2xl font-bold mt-4">
+            <Typography variant="h5" fontWeight={700} sx={{ mt: 2 }}>
               Welcome back
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               Log in to continue your health journey
-            </p>
-          </div>
+            </Typography>
+          </Box>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <div className="relative mt-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="pl-9"
-                  {...register("email")}
-                />
-              </div>
-              {errors.email && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <TextField
+              label="Email address"
+              type="email"
+              placeholder="you@example.com"
+              fullWidth
+              size="small"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlinedIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              {...register("email")}
+            />
 
-            <div>
-              <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-primary hover:underline"
-                >
+            <Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+                <Typography variant="body2" fontWeight={500}>
+                  Password
+                </Typography>
+                <Link href="/forgot-password" style={{ fontSize: "0.75rem", color: "inherit", textDecoration: "none" }}>
                   Forgot password?
                 </Link>
-              </div>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  className="pl-9 pr-9"
-                  {...register("password")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+              </Box>
+              <TextField
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                fullWidth
+                size="small"
+                error={!!errors.password}
+                helperText={errors.password?.message}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlinedIcon fontSize="small" sx={{ color: "text.secondary" }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          size="small"
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+                {...register("password")}
+              />
+            </Box>
 
-            <Button className="w-full" disabled={loading}>
+            <MuiButton
+              type="submit"
+              variant="contained"
+              fullWidth
+              disabled={loading}
+              endIcon={!loading && <ArrowForwardIcon />}
+              sx={{ py: 1.2 }}
+            >
               {loading ? "Logging in..." : "Log In"}
-              {!loading && <ArrowRight className="ml-1 size-4" />}
-            </Button>
-          </form>
+            </MuiButton>
+          </Box>
 
-          <div className="my-6 flex items-center gap-3">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">or continue with</span>
-            <Separator className="flex-1" />
-          </div>
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="caption" color="text.secondary">
+              or continue with
+            </Typography>
+          </Divider>
 
-          <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={signInWithGoogle}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <MuiButton
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              startIcon={<GoogleIcon />}
+              onClick={() => handleOAuth("google")}
+              sx={{ py: 1 }}
             >
-              <svg className="size-4 mr-2" viewBox="0 0 24 24">
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
-              </svg>
               Continue with Google
-            </Button>
+            </MuiButton>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={signInWithFacebook}
+            <MuiButton
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              startIcon={<FacebookIcon sx={{ color: "#1877F2" }} />}
+              onClick={() => handleOAuth("facebook")}
+              sx={{ py: 1 }}
             >
-              <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="#1877F2">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
               Continue with Facebook
-            </Button>
+            </MuiButton>
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={signInWithApple}
+            <MuiButton
+              variant="outlined"
+              color="inherit"
+              fullWidth
+              startIcon={<AppleIcon />}
+              onClick={() => handleOAuth("apple")}
+              sx={{ py: 1 }}
             >
-              <svg className="size-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-              </svg>
               Continue with Apple
-            </Button>
-          </div>
+            </MuiButton>
+          </Box>
 
-          <p className="text-center text-sm mt-6 text-muted-foreground">
+          <Typography variant="body2" align="center" sx={{ mt: 3 }} color="text.secondary">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary font-medium hover:underline">
+            <Link href="/register" style={{ color: "inherit", fontWeight: 600, textDecoration: "none" }}>
               Sign up free
             </Link>
-          </p>
-        </div>
+          </Typography>
+        </Paper>
       </motion.div>
-    </div>
+    </Box>
   );
 }

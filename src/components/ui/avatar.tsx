@@ -1,109 +1,122 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar"
+import * as React from "react";
+import MuiAvatar from "@mui/material/Avatar";
+import MuiAvatarGroup from "@mui/material/AvatarGroup";
+import Box from "@mui/material/Box";
 
-import { cn } from "@/lib/utils"
+type AvatarSize = "default" | "sm" | "lg";
 
-function Avatar({
-  className,
-  size = "default",
-  ...props
-}: AvatarPrimitive.Root.Props & {
-  size?: "default" | "sm" | "lg"
-}) {
+const sizeMap = { sm: 24, default: 32, lg: 40 };
+
+interface AvatarProps extends React.ComponentProps<"div"> {
+  size?: AvatarSize;
+}
+
+function Avatar({ className, size = "default", children, ...props }: AvatarProps) {
   return (
-    <AvatarPrimitive.Root
-      data-slot="avatar"
-      data-size={size}
-      className={cn(
-        "group/avatar relative flex size-8 shrink-0 rounded-full select-none after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
-        className
-      )}
+    <MuiAvatar
+      className={className}
+      sx={{ width: sizeMap[size], height: sizeMap[size], fontSize: size === "sm" ? "0.75rem" : "0.875rem" }}
+      {...(props as React.ComponentProps<typeof MuiAvatar>)}
+    >
+      {children}
+    </MuiAvatar>
+  );
+}
+
+function AvatarImage({ className, src, alt, ...props }: React.ComponentProps<"img">) {
+  // MUI Avatar handles image via src prop on Avatar itself
+  // This is kept for backward compatibility — consumers should put src on Avatar
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
       {...props}
     />
-  )
+  );
 }
 
-function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
+function AvatarFallback({ className, children, ...props }: React.ComponentProps<"span">) {
   return (
-    <AvatarPrimitive.Image
-      data-slot="avatar-image"
-      className={cn(
-        "aspect-square size-full rounded-full object-cover",
-        className
-      )}
+    <Box
+      component="span"
+      className={className}
+      sx={{
+        display: "flex",
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        bgcolor: "action.selected",
+        fontSize: "0.875rem",
+        color: "text.secondary",
+      }}
       {...props}
-    />
-  )
+    >
+      {children}
+    </Box>
+  );
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: AvatarPrimitive.Fallback.Props) {
+function AvatarBadge({ className, children, ...props }: React.ComponentProps<"span">) {
   return (
-    <AvatarPrimitive.Fallback
-      data-slot="avatar-fallback"
-      className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
-        className
-      )}
+    <Box
+      component="span"
+      className={className}
+      sx={{
+        position: "absolute",
+        right: 0,
+        bottom: 0,
+        zIndex: 10,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        bgcolor: "primary.main",
+        color: "primary.contrastText",
+        width: 10,
+        height: 10,
+        ring: 2,
+      }}
       {...props}
-    />
-  )
+    >
+      {children}
+    </Box>
+  );
 }
 
-function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
+function AvatarGroup({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <span
-      data-slot="avatar-badge"
-      className={cn(
-        "absolute right-0 bottom-0 z-10 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground bg-blend-color ring-2 ring-background select-none",
-        "group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden",
-        "group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2",
-        "group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2",
-        className
-      )}
-      {...props}
-    />
-  )
+    <MuiAvatarGroup className={className} {...(props as React.ComponentProps<typeof MuiAvatarGroup>)}>
+      {children}
+    </MuiAvatarGroup>
+  );
 }
 
-function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
+function AvatarGroupCount({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="avatar-group"
-      className={cn(
-        "group/avatar-group flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background",
-        className
-      )}
+    <Box
+      className={className}
+      sx={{
+        display: "flex",
+        width: 32,
+        height: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        bgcolor: "action.selected",
+        fontSize: "0.875rem",
+        color: "text.secondary",
+      }}
       {...props}
-    />
-  )
+    >
+      {children}
+    </Box>
+  );
 }
 
-function AvatarGroupCount({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="avatar-group-count"
-      className={cn(
-        "relative flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground ring-2 ring-background group-has-data-[size=lg]/avatar-group:size-10 group-has-data-[size=sm]/avatar-group:size-6 [&>svg]:size-4 group-has-data-[size=lg]/avatar-group:[&>svg]:size-5 group-has-data-[size=sm]/avatar-group:[&>svg]:size-3",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
-export {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-  AvatarBadge,
-}
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarBadge };

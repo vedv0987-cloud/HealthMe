@@ -1,5 +1,6 @@
 "use client";
 
+import Box from "@mui/material/Box";
 import { useIsDesktop } from "@/hooks/use-media-query";
 import { AppHeader } from "@/components/layouts/app-header";
 import { DesktopSidebar, MobileSidebar } from "@/components/layouts/sidebar";
@@ -14,24 +15,27 @@ export function AppLayout({ children, title }: AppLayoutProps) {
   const isDesktop = useIsDesktop();
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Desktop sidebar */}
+    <Box sx={{ display: "flex", height: "100vh", bgcolor: "background.default" }}>
       {isDesktop && <DesktopSidebar />}
-
-      {/* Mobile sidebar drawer */}
       {!isDesktop && <MobileSidebar />}
 
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <Box sx={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
         <AppHeader title={title} />
 
-        <main className="flex-1 overflow-y-auto p-4 pb-24 lg:p-6 lg:pb-6">
+        <Box
+          component="main"
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            p: { xs: 2, lg: 3 },
+            pb: { xs: 12, lg: 3 },
+          }}
+        >
           {children}
-        </main>
-      </div>
+        </Box>
+      </Box>
 
-      {/* Mobile bottom navigation */}
       {!isDesktop && <BottomNav />}
-    </div>
+    </Box>
   );
 }
