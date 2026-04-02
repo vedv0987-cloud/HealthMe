@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HealMe</string>
+    <string name="title_activity_main">HealMe</string>
+    <string name="package_name">app.healme.main</string>
+    <string name="custom_url_scheme">app.healme.main</string>
+</resources>
